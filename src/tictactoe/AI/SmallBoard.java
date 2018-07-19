@@ -7,6 +7,7 @@ public class SmallBoard implements Board{
 	private static final int O = -1;
 	
 	private int[] spaces = new int[9];
+	private int lastTurn;
 	
 	public SmallBoard()
 	{
@@ -15,10 +16,24 @@ public class SmallBoard implements Board{
 		}
 	}
 	
+	public SmallBoard(int[] spaces)
+	{
+		this.spaces = spaces;
+	}
+	
 	public boolean makeMove(int player, int space)
 	{
 		if(!getLegalMoves().contains(space)) {return false;}
 		spaces[space] = player;
+		return true;
+	}
+	
+	public boolean makeMove(int space)
+	{
+		int player = -lastTurn;
+		if(!getLegalMoves().contains(space)) {return false;}
+		spaces[space] = player;
+		lastTurn = player;
 		return true;
 	}
 	
@@ -129,4 +144,21 @@ public class SmallBoard implements Board{
 		else if(sum1 == -3 || sum2 == -3) {return -1;}
 		return 0;
 	}
+	
+	public Board getCopy()
+	{
+		int[] newSpaces = new int[spaces.length];
+		for(int i=0; i<spaces.length; i++)
+		{
+			newSpaces[i] = Integer.valueOf(spaces[i]);
+		}
+		return new SmallBoard(newSpaces);
+	}
+	
+	public boolean checkDone()
+	{
+		if(checkWin() != 0 || getLegalMoves().size() == 0) {return true;}
+		return false;
+	}
 }
+

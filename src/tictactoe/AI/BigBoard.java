@@ -8,6 +8,7 @@ public class BigBoard implements Board{
 	
 	private Board[] spaces = new Board[9];
 	private int currentBoard = -1;
+	private int lastTurn = -1;
 	
 	public BigBoard()
 	{
@@ -17,28 +18,69 @@ public class BigBoard implements Board{
 		}
 	}
 	
+	public BigBoard(Board[] spaces, int currentBoard)
+	{
+		this.spaces = spaces;
+		this.currentBoard = currentBoard;
+	}
+	
+	public void setTurn(int lastTurn) 
+	{
+		this.lastTurn = lastTurn;
+	}
+	
 	public boolean makeMove(int player, int move) {
 		if(getLegalMoves().contains(move)) {
 			int board = move/9;
 			int space = move%9;
 			spaces[board].makeMove(player, space);
 			updateCurrentBoard(move);
+			lastTurn = player;
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean makeMove(int move)
+	{
+		int player = -lastTurn;
+		if(getLegalMoves().contains(move)) {
+			int board = move/9;
+			int space = move%9;
+			spaces[board].makeMove(player, space);
+			updateCurrentBoard(move);
+			lastTurn = player;
 			return true;
 		}
 		return false;
 	}
 
 	
-	//#TODO
 	public void printBoard() {
-		
+		for(int i = 0; i<9; i++)
+		{
+			int boardRow = i/3;
+			for(int j=0; j<3; j++)
+			{
+				spaces[boardRow*3+j].printRow(i%3);
+				if(j!=2) {System.out.print("  ||  ");}
+			}
+			System.out.println();
+			if(i%3 != 2) {System.out.println("---------"+"      "+"---------"+"      "+"---------");}
+			else {
+				System.out.println("______________________________________");
+				System.out.println("______________________________________");
+				System.out.println();
+			}
+		}
 	}
+	
+	public void printRow(int row) {}
 
 	public ArrayList<Integer> getLegalMoves() {
 		ArrayList<Integer> moveList = new ArrayList<Integer>();
 		if(currentBoard == -1)
 		{
-			System.out.println();
 			for(int i=0; i<spaces.length; i++)
 			{
 				Board board = spaces[i];
@@ -51,13 +93,21 @@ public class BigBoard implements Board{
 			}
 		}else {
 			Board board = spaces[currentBoard];
-			moveList = board.getLegalMoves();
+			for(Integer x : board.getLegalMoves()) {
+				moveList.add(x+(currentBoard*9));
+			}
 		}
 		
 		
 		return moveList;
 	}
 
+	public boolean checkDone()
+	{
+		if(checkWin() != 0 || getLegalMoves().size() == 0) {return true;}
+		return false;
+	}
+	
 	public int checkWin()
 	{
 		for(int i=0; i<3; i++) {
@@ -65,6 +115,7 @@ public class BigBoard implements Board{
 			if(checkCol(i) != 0) {return checkCol(i);}
 		}
 		return checkDia();
+		
 	}
 	
 	private int checkRow(int row)
@@ -109,7 +160,20 @@ public class BigBoard implements Board{
 	private void updateCurrentBoard(int space)
 	{
 		int newBoard = space%9;
-		if(spaces[newBoard].checkWin() != 0) {newBoard = -1;}
+		if(spaces[newBoard].checkDone()) {newBoard = -1;}
 		currentBoard = newBoard;
 	}
+	
+	public BigBoard getCopy()
+	{
+		Board[] newSpaces = new Board[spaces.length];
+		for(int i=0; i<spaces.length; i++)
+		{
+			newSpaces[i] = spaces[i].getCopy();
+		}
+		BigBoard newBoard = new BigBoard(newSpaces, currentBoard);
+		newBoard.setTurn(lastTurn);
+		return newBoard;
+	}
+	
 }

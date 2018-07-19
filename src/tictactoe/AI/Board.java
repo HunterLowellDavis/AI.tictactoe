@@ -7,4 +7,8 @@ public interface Board {
 	public void printBoard();
 	public int checkWin();
 	public ArrayList<Integer> getLegalMoves();
+	public void printRow(int row);
+	public Board getCopy();
+	public boolean checkDone();
+	public boolean makeMove(int move);
 }
